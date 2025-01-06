@@ -1,11 +1,10 @@
 {
-  "name": "@vitejs/plugin-react",
+  "name": "@dhw/plugin-react-native-web",
   "version": "4.3.4",
   "license": "MIT",
-  "author": "Evan You",
+  "author": "Daniel Williams",
   "contributors": [
-    "Alec Larson",
-    "Arnaud Barré"
+    "Daniel Williams"
   ],
   "files": [
     "dist"
@@ -44,6 +43,7 @@
     "babel-plugin-react-native-web": "^0.19.13",
     "@babel/plugin-transform-flow-strip-types": "^7.25.9",
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
+    "@babel/plugin-syntax-export-default-from": "^7.25.9",
     "@types/babel__core": "^7.20.5",
     "react-refresh": "^0.14.2"
   },

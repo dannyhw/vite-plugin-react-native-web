@@ -82,7 +82,7 @@ type ReactBabelHookContext = { ssr: boolean; id: string }
 
 export type ViteReactPluginApi = {
   /**
-   * Manipulate the Babel options of `@vitejs/plugin-react`
+   * Manipulate the Babel options of `@dhw/plugin-react-native-web`
    */
   reactBabel?: ReactBabelHook
 }
@@ -146,6 +146,7 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
           'process.env.NODE_ENV': JSON.stringify(
             process.env.NODE_ENV || env.mode,
           ),
+          __reanimatedLoggerConfig: `{}`,
         },
         optimizeDeps: {
           esbuildOptions: {
@@ -166,18 +167,18 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
 
       if (opts.jsxRuntime === 'classic') {
         return {
+          ...commonOptions,
           esbuild: {
             jsx: 'transform',
           },
-          ...commonOptions,
         } satisfies ViteOptions
       } else {
         return {
+          ...commonOptions,
           esbuild: {
             jsx: 'automatic',
             jsxImportSource: opts.jsxImportSource,
           },
-          ...commonOptions,
           optimizeDeps: {
             ...commonOptions.optimizeDeps,
             esbuildOptions: {
@@ -199,7 +200,7 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
 
       if ('jsxPure' in opts) {
         config.logger.warnOnce(
-          '[@vitejs/plugin-react] jsxPure was removed. You can configure esbuild.jsxSideEffects directly.',
+          '[@dhw/plugin-react-native-web] jsxPure was removed. You can configure esbuild.jsxSideEffects directly.',
         )
       }
 
@@ -234,9 +235,20 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
         return newBabelOptions
       })()
       const plugins = [
-        loadPlugin('babel-plugin-react-native-web'),
-        loadPlugin('@babel/plugin-transform-flow-strip-types'),
-        loadPlugin('@babel/plugin-transform-modules-commonjs'),
+        await loadPlugin('babel-plugin-react-native-web'),
+        await loadPlugin('@babel/plugin-transform-flow-strip-types'),
+        await loadPlugin('@babel/plugin-syntax-export-default-from'),
+        // [
+        //   // this is a fix for reanimated not working in production
+        //   '@babel/plugin-transform-modules-commonjs',
+        //   {
+        //     strict: false,
+        //     strictMode: false, // prevent "use strict" injections
+        //     allowTopLevelThis: true, // dont rewrite global `this` -> `undefined`
+        //   },
+        // ],
+
+        // await loadPlugin('@babel/plugin-transform-modules-commonjs'),
         ...babelOptions.plugins,
       ]
 
@@ -336,7 +348,7 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
     jsxImportRuntime,
   ]
   const staticBabelPlugins =
-    typeof opts.babel === 'object' ? opts.babel?.plugins ?? [] : []
+    typeof opts.babel === 'object' ? (opts.babel?.plugins ?? []) : []
   const reactCompilerPlugin = getReactCompilerPlugin(staticBabelPlugins)
   if (reactCompilerPlugin != null) {
     const reactCompilerRuntimeModule =
@@ -353,7 +365,7 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
         include: dependencies,
       },
       resolve: {
-        dedupe: ['react', 'react-dom'],
+        dedupe: ['react', 'react-dom', 'react-native', 'react-native-web'],
       },
     }),
     resolveId(id) {

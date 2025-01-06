@@ -1,5 +1,5 @@
 {
-  "name": "@vitejs/vite-plugin-react-monorepo",
+  "name": "@dhw/vite-plugin-react-native-web-monorepo",
   "private": true,
   "type": "module",
   "engines": {

@@ -1,29 +1,42 @@
 import { useState } from 'react'
 import Button from 'jsx-entry'
+import { Text, TouchableOpacity, View } from 'react-native'
 import Dummy from './components/Dummy?qs-should-not-break-plugin-react'
 import Parent from './hmr/parent'
 import { JsxImportRuntime } from './hmr/jsx-import-runtime'
 import { CountProvider } from './context/CountProvider'
 import { ContextButton } from './context/ContextButton'
 import { TestImportAttributes } from './import-attributes/test'
+import { PressableWithOverlay } from './components/PressableWithOverlay'
 
 function App() {
   const [count, setCount] = useState(0)
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Hello Vite + React</h1>
-        <p>
-          <button
-            id="state-button"
-            onClick={() => setCount((count) => count + 1)}
-          >
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          <ContextButton />
-        </p>
+    <View>
+      <View style={{ flex: 1, gap: 16, alignItems: 'flex-start' }}>
+        <Text
+          accessibilityRole="header"
+          style={{ fontSize: 20, fontWeight: 'bold', marginVertical: 16 }}
+        >
+          Hello Vite + React
+        </Text>
+
+        <PressableWithOverlay
+          style={{
+            padding: 8,
+            backgroundColor: 'lightgrey',
+            borderRadius: 4,
+            borderWidth: 1,
+            borderColor: 'grey',
+          }}
+          testID="state-button"
+          onPress={() => setCount((count) => count + 1)}
+        >
+          <Text>count is: {count}</Text>
+        </PressableWithOverlay>
+
+        <ContextButton />
+
         <p>
           Edit <code>App.jsx</code> and save to test HMR updates.
         </p>
@@ -35,14 +48,14 @@ function App() {
         >
           Learn React
         </a>
-      </header>
+      </View>
 
       <Dummy />
       <Parent />
       <JsxImportRuntime />
       <Button>button</Button>
       <TestImportAttributes />
-    </div>
+    </View>
   )
 }
 

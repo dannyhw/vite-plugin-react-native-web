@@ -1,5 +1,5 @@
 {
-  "name": "@vitejs/test-react",
+  "name": "@dhw/test-react-native",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,10 +11,14 @@
   "dependencies": {
     "jsx-entry": "file:./jsx-entry",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-native": "^0.76.5",
+    "react-native-web": "^0.19.13",
+    "react-native-reanimated": "^3.16.6",
+    "@babel/plugin-proposal-export-namespace-from": "^7.18.9"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "workspace:*"
+    "@dhw/plugin-react-native-web": "workspace:*"
   },
   "babel": {
     "presets": [

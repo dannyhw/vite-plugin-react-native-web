@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@dhw/plugin-react-native-web'
 
 process.env.MY_CUSTOM_SECRET = 'API_KEY_qwertyuiop'
 
