@@ -41,6 +41,9 @@
     "@babel/core": "^7.26.0",
     "@babel/plugin-transform-react-jsx-self": "^7.25.9",
     "@babel/plugin-transform-react-jsx-source": "^7.25.9",
+    "babel-plugin-react-native-web": "^0.19.13",
+    "@babel/plugin-transform-flow-strip-types": "^7.25.9",
+    "@babel/plugin-transform-modules-commonjs": "^7.26.3",
     "@types/babel__core": "^7.20.5",
     "react-refresh": "^0.14.2"
   },

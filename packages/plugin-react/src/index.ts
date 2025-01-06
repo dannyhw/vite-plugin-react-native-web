@@ -90,12 +90,16 @@ export type ViteReactPluginApi = {
 const reactCompRE = /extends\s+(?:React\.)?(?:Pure)?Component/
 const refreshContentRE = /\$Refresh(?:Reg|Sig)\$\(/
 const defaultIncludeRE = /\.[tj]sx?$/
+const defaultExcludeRE = /\/node_modules\/(?!react-native|@react-native)/
 const tsRE = /\.tsx?$/
 
 export default function viteReact(opts: Options = {}): PluginOption[] {
   // Provide default values for Rollup compat.
   let devBase = '/'
-  const filter = createFilter(opts.include ?? defaultIncludeRE, opts.exclude)
+  const filter = createFilter(
+    opts.include ?? defaultIncludeRE,
+    opts.exclude ?? defaultExcludeRE,
+  )
   const jsxImportSource = opts.jsxImportSource ?? 'react'
   const jsxImportRuntime = `${jsxImportSource}/jsx-runtime`
   const jsxImportDevRuntime = `${jsxImportSource}/jsx-dev-runtime`
@@ -113,24 +117,75 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
   // - import React, {useEffect} from 'react';
   const importReactRE = /\bimport\s+(?:\*\s+as\s+)?React\b/
 
+  const extensions = [
+    '.web.js',
+    '.web.ts',
+    '.web.tsx',
+    '.web.jsx',
+    '.web.mjs',
+    '.js',
+    '.mjs',
+    '.jsx',
+    '.json',
+    '.ts',
+    '.tsx',
+  ]
+
+  type ViteOptions = Omit<UserConfig, 'plugins'>
+
   const viteBabel: Plugin = {
     name: 'vite:react-babel',
     enforce: 'pre',
-    config() {
+    config(_userConfig, env) {
+      const commonOptions = {
+        define: {
+          'global.__x': {},
+          _frameTimestamp: undefined,
+          _WORKLET: false,
+          __DEV__: `${env.mode === 'development'}`,
+          'process.env.NODE_ENV': JSON.stringify(
+            process.env.NODE_ENV || env.mode,
+          ),
+        },
+        optimizeDeps: {
+          esbuildOptions: {
+            jsx: 'transform',
+            resolveExtensions: extensions,
+            loader: {
+              '.js': 'jsx',
+            },
+          },
+        },
+        resolve: {
+          extensions: extensions,
+          alias: {
+            'react-native': 'react-native-web',
+          },
+        },
+      } satisfies ViteOptions
+
       if (opts.jsxRuntime === 'classic') {
         return {
           esbuild: {
             jsx: 'transform',
           },
-        }
+          ...commonOptions,
+        } satisfies ViteOptions
       } else {
         return {
           esbuild: {
             jsx: 'automatic',
             jsxImportSource: opts.jsxImportSource,
           },
-          optimizeDeps: { esbuildOptions: { jsx: 'automatic' } },
-        }
+          ...commonOptions,
+          optimizeDeps: {
+            ...commonOptions.optimizeDeps,
+            esbuildOptions: {
+              ...commonOptions.optimizeDeps.esbuildOptions,
+              jsx: 'automatic',
+            },
+          },
+        } satisfies ViteOptions
       }
     },
     configResolved(config) {
@@ -164,8 +219,6 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
       }
     },
     async transform(code, id, options) {
-      if (id.includes('/node_modules/')) return
-
       const [filepath] = id.split('?')
       if (!filter(filepath)) return
 
@@ -180,7 +233,12 @@ export default function viteReact(opts: Options = {}): PluginOption[] {
         runPluginOverrides?.(newBabelOptions, { id, ssr })
         return newBabelOptions
       })()
-      const plugins = [...babelOptions.plugins]
+      const plugins = [
+        loadPlugin('babel-plugin-react-native-web'),
+        loadPlugin('@babel/plugin-transform-flow-strip-types'),
+        loadPlugin('@babel/plugin-transform-modules-commonjs'),
+        ...babelOptions.plugins,
+      ]
 
       const isJSX = filepath.endsWith('x')
       const useFastRefresh =

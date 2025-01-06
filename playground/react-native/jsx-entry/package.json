@@ -1,0 +1,6 @@
+{
+  "name": "jsx-entry",
+  "private": true,
+  "type": "module",
+  "main": "Button.jsx"
+}
